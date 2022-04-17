@@ -2,9 +2,10 @@ from fastapi import FastAPI, Depends
 from fastapi.exceptions import HTTPException
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
-from schema import TaskCreate, UserCreate
+from schema import Task, TaskCreate, UserCreate
 import models, schema, crud
 from database import SessionLocal, engine
+from fastapi.encoders import jsonable_encoder
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -48,3 +49,22 @@ def get_tasks(token: str, db: Session = Depends(get_db)):
 
     else:
         raise HTTPException(status_code=404, detail="User not found")
+
+@app.post('/new-task')
+def add_task(token: str, task: TaskCreate, db: Session = Depends(get_db)):
+    user = crud.get_user_by_token(db, token)
+    task.owner_id = user.id
+    db_task = crud.create_task(db, task)
+    return db_task
+
+@app.put('/edit-task/{task_id}')
+def edit_task(task_id: int, token: str, task: Task, db: Session = Depends(get_db)):
+    user = crud.get_user_by_token(db, token)
+    current_task = crud.get_task(db, user.id, task_id)
+    if not current_task:
+        raise HTTPException(
+                status_code= 400,
+                detail= "Unauthorized access"
+                )
+
+    return
