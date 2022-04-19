@@ -67,4 +67,4 @@ def edit_task(task_id: int, token: str, task: Task, db: Session = Depends(get_db
                 detail= "Unauthorized access"
                 )
 
-    return
+    return crud.edit_task(db, task, task_id, current_task)

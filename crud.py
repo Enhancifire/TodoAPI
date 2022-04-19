@@ -30,8 +30,8 @@ def create_user(db: Session, user: schema.UserCreate):
     key, salt = hasher.hash(user.password)
     db_user = models.User(
             email = user.email,
-            hashed_password = str(key),
-            salt = str(salt),
+            hashed_password = key,
+            salt = salt,
             auth_token = token,
             )
 
@@ -62,5 +62,11 @@ def get_task(db: Session, owner_id: int, task_id: int):
     else:
         return None
 
-# def edit_task(db: Session)
+def edit_task(db: Session, new_task: schema.Task, task_id: int, task: models.Task):
+    task.due = new_task.due
+    task.title = new_task.title
+
+    db.commit()
+    db.refresh(task)
+    return task
 
