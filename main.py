@@ -60,11 +60,11 @@ def add_task(token: str, task: TaskCreate, db: Session = Depends(get_db)):
 @app.put('/edit-task/{task_id}')
 def edit_task(task_id: int, token: str, task: Task, db: Session = Depends(get_db)):
     user = crud.get_user_by_token(db, token)
-    current_task = crud.get_task(db, user.id, task_id)
-    if not current_task:
-        raise HTTPException(
-                status_code= 400,
-                detail= "Unauthorized access"
-                )
+    return crud.edit_task(db, task, task_id, user.id)
 
-    return crud.edit_task(db, task, task_id, current_task)
+@app.delete('/delete/{task_id}')
+def delete(task_id: int, token: str, db: Session = Depends(get_db)):
+    user = crud.get_user_by_token(db, token)
+
+    return crud.delete_task(db, task_id, user.id)
+

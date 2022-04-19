@@ -62,7 +62,14 @@ def get_task(db: Session, owner_id: int, task_id: int):
     else:
         return None
 
-def edit_task(db: Session, new_task: schema.Task, task_id: int, task: models.Task):
+def edit_task(db: Session, new_task: schema.Task, task_id: int, id:int):
+    task = get_task(db, id, task_id)
+    if not task:
+        raise HTTPException(
+                status_code= 400,
+                detail= "Unauthorized access"
+                )
+
     task.due = new_task.due
     task.title = new_task.title
 
@@ -70,3 +77,11 @@ def edit_task(db: Session, new_task: schema.Task, task_id: int, task: models.Tas
     db.refresh(task)
     return task
 
+def delete_task(db: Session, task_id: int, owner_id: int):
+    task = get_task(db, owner_id, task_id)
+    db.delete(task)
+    db.commit()
+
+    return {
+            "message": "Task with id: {task_id} deleted successfully"
+            }
